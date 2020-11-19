@@ -1,7 +1,7 @@
 from keras.models import Sequential
 from keras.layers import Dense
 
-def buildModel():
+def feedForward():
     model = Sequential()
     model.add(Dense(units=128,
                     input_dim=9,
@@ -19,9 +19,13 @@ def buildModel():
 
     return model
 
-def trainModel(trainX, trainY):
+def trainModel(modelType, trainX, trainY):
 
-    model = buildModel()
+    if modelType == 'simple':
+        model = feedForward()
+    else:
+        print("You haven't built other models yet!")
+        return
 
     print('Shape of trainFeatures:' + str(trainX.shape))
     print('Shape of trainLabels:' + str(trainY.shape))
@@ -33,11 +37,15 @@ def trainModel(trainX, trainY):
               batch_size=5,
               verbose=1)
 
+    ## !! Export model weights to a JSON?
+
     return model
 
 def testModel(model, testX, testY):
     scores = model.evaluate(testX, testY)
+
+    ## !! Add other metrics
     print('\n')
-    print('accuracy: ' + str(scores[1]))
+    print('\t accuracy: ' + str(scores[1]))
 
     return

@@ -1,7 +1,15 @@
+import tensorflow as tf
+import keras
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+from keras.preprocessing.sequence import TimeseriesGenerator
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+
+
 
 def meanImputation(data):
     """
@@ -136,6 +144,37 @@ def generateSamples(numTargets, df, windowSize):
     ## !! Maybe need to reshape y? not sure
     return x, y
 
+def myTimeSeries(df):
+
+    return df
+
+
+def tfTimeSeries(df):
+    data = df[['HR','RMSSD','SCL']]
+    targets = df['label']
+
+    data = np.array(data).astype('float32')
+    targets = targets.replace({'rest':0, 'no stress':0, 'interruption':1, 'time pressure':1})
+    targets = np.array(targets).astype('float32')
+
+    sequence_length = 3
+    timeSeries = tf.keras.preprocessing.timeseries_dataset_from_array(
+        data, targets, sequence_length, sequence_stride=1, sampling_rate=1,
+        batch_size=1, shuffle=True, seed=None, start_index=None, end_index=None
+    )
+
+    return timeSeries
+
+def kerasTimeseriesGenerator(df):
+    data = df[['HR','RMSSD','SCL']]
+    targets = df['label']
+    targets = targets.replace({'rest': 0, 'no stress': 0, 'interruption': 1, 'time pressure': 1})
+    data_gen = TimeseriesGenerator(data, targets,
+                                   length=3, sampling_rate=1)
+    batch_0 = data_gen[0]
+    train, test = batch_0
+
+    return train, test
 
 def generateData(windowSize):
     """
@@ -150,32 +189,33 @@ def generateData(windowSize):
     ## Read in participant data files
     p1 = importCSV('p1.csv')
     p2 = importCSV('p2.csv')
-    p3 = importCSV('p3.csv')
-    p4 = importCSV('p4.csv')
-    p5 = importCSV('p5.csv')
-    p6 = importCSV('p6.csv')
-    p7 = importCSV('p7.csv')
+    ##p3 = importCSV('p3.csv')
+    ##p4 = importCSV('p4.csv')
+    ##p5 = importCSV('p5.csv')
+    ##p6 = importCSV('p6.csv')
+    ##p7 = importCSV('p7.csv')
     ## p8 = importCSV('p8.csv') 100% of HR and RMSSD missing
     p9 = importCSV('p9.csv')
-    p10 = importCSV('p10.csv')
+    ##p10 = importCSV('p10.csv')
     ## p11 = importCSV('p11.csv') 100% of HR and RMSSD missing
-    p12 = importCSV('p12.csv')
-    p13 = importCSV('p13.csv')
-    p14 = importCSV('p14.csv')
-    p15 = importCSV('p15.csv')
-    p16 = importCSV('p16.csv')
-    p17 = importCSV('p17.csv')
-    p18 = importCSV('p18.csv')
-    p19 = importCSV('p19.csv')
-    p20 = importCSV('p20.csv')
-    p21 = importCSV('p21.csv')
-    p22 = importCSV('p22.csv')
-    p23 = importCSV('p23.csv')
-    p24 = importCSV('p24.csv')
-    p25 = importCSV('p25.csv')
+    ##p12 = importCSV('p12.csv')
+    ##p13 = importCSV('p13.csv')
+    #3p14 = importCSV('p14.csv')
+    ##p15 = importCSV('p15.csv')
+    ##p16 = importCSV('p16.csv')
+    ##p17 = importCSV('p17.csv')
+    ##p18 = importCSV('p18.csv')
+    ##p19 = importCSV('p19.csv')
+    ##p20 = importCSV('p20.csv')
+    ##p21 = importCSV('p21.csv')
+    ##p22 = importCSV('p22.csv')
+    ##p23 = importCSV('p23.csv')
+    ##p24 = importCSV('p24.csv')
+    ##p25 = importCSV('p25.csv')
 
+    """
     participantDFs = [p1, p2, p3, p4, p5, p6, p7, p9, p10, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25]
-
+    
     features = []
     labels = []
 
@@ -191,4 +231,45 @@ def generateData(windowSize):
     testFeatures = np.array(testX)
     testLabels = np.array(testY)
 
-    return trainFeatures, trainLabels, testFeatures, testLabels
+    """
+    ##data = pd.concat([p1, p2, p3, p4, p5, p6, p7, p9, p10, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25], axis=0)
+
+    trainX, trainY = kerasTimeseriesGenerator(p9)
+
+    """
+        b = tfTimeSeries(p1)
+    c = tfTimeSeries(p2)
+
+    timeSeries = tf.concat([a,b,c], 0)
+
+    for t in timeSeries:
+        print(t)
+    
+    """
+    #trainX = np.reshape(trainX, [])
+    print(trainX.shape)
+    print(trainY.shape)
+
+    model = Sequential()
+    model.add(tf.keras.Input(shape=(None,3,3)))
+    model.add(Dense(units=128,
+                    activation='softmax'))
+    model.add(Dense(units=3,
+                    activation='softmax'))
+
+    print(model.summary())
+
+    model.compile(loss='categorical_crossentropy',
+                  optimizer='adam',
+                  metrics=['categorical_accuracy'])
+
+    model.fit(x=trainX,
+              y=trainY,
+              validation_split=0.15,
+              epochs=100,
+              batch_size=5,
+              verbose=1)
+
+    return ##trainFeatures, trainLabels, testFeatures, testLabels
+
+generateData(3)

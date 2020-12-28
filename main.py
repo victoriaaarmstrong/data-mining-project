@@ -174,7 +174,7 @@ def lstmTest(model, testX, testY):
     print('\n accuracy: ')
     print(predictions[1])
 
-    return predictions[1] #outputs
+    return  outputs #predictions[1]
 
 
 def main():
@@ -234,7 +234,6 @@ def main():
     ######################################################
     ## Within-participant training, testing and gaphing ##
     ######################################################
-    """
     ## Train test split of all data
     #train, test = train_test_split(data, test_size=0.3, random_state=42)
 
@@ -243,8 +242,8 @@ def main():
     #train, test = train_test_split(data, test_size=0.3, random_state=42)
 
     ## Train test split of stress condition data
-    #data = data[~data['label'].isin(['0'])]
-    #train, test = train_test_split(data, test_size=0.3, random_state=42)
+    data = data[~data['label'].isin(['0'])]
+    train, test = train_test_split(data, test_size=0.3, random_state=42)
 
     ## Makes time series data from the desired data set
     trainX, trainY = timeSeries(train, WINDOW, PREDICTION)
@@ -272,7 +271,7 @@ def main():
 
     ## Setting X-labels for predictions
     x1 = [0,1,2,3,4,5,6,7,8,9]
-    x2 = [10,11,12] #,13,14,15,16,17,18,19]
+    x2 = [10,11,12,13,14,15,16,17,18,19]
 
     ## Plot
     plt.plot(x1, input, c='g', label='input' )
@@ -280,7 +279,6 @@ def main():
     plt.scatter(x2, true, c='r', label='true')
     plt.legend(loc='upper left')
     plt.show()
-    """
 
     #######################################################
     ## Unseen participant training, testing and graphing ##
@@ -321,11 +319,11 @@ def main():
 
     ## Get values to plot
     for i in range(WINDOW):
-        input.append(testX[0][i][1])
+        input.append(testX[25][i][0])
 
     for i in range(PREDICTION):
-        predicted.append(predictions[0][i][1])
-        true.append(testY[0][i][1])
+        predicted.append(predictions[25][i][0])
+        true.append(testY[25][i][0])
 
     ## Setting X-labels for predictions
     x1 = [0,1,2,3,4,5,6,7,8,9]
@@ -338,10 +336,10 @@ def main():
     plt.legend(loc='upper left')
     plt.show()
     """
-
     ###############################################################
     ### Use to average a bunch of independent test particiapnts ###
     ###############################################################
+    """
     testSplits = [['p1, p2, p3, p4'],
                   ['p2, p3, p4, p5'],
                   ['p3, p4, p5, p6'],
@@ -379,6 +377,7 @@ def main():
 
     mses = np.array(mses)
     print(mses.mean())
+    """
 
     return
 
